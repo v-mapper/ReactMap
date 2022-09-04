@@ -124,6 +124,174 @@ export default function GymPopup({
             <ExtraInfo gym={gym} t={t} ts={ts} />
           </Collapse>
         )}
+        {perms.gyms &&
+          Array.isArray(gym.defenders) &&
+          gym.defenders.length > 0 && (
+            <Collapse in={popups.defenders} timeout="auto" unmountOnExit>
+              <Grid
+                container
+                style={{
+                  maxHeight: 'calc(100vh - 425px)',
+                  overflow: 'auto',
+                }}
+              >
+                {gym.defenders.map((defender, index) => (
+                  <Grid
+                    item
+                    container
+                    xs={12}
+                    key={defender.pokemon_id}
+                    style={{
+                      padding:
+                        // eslint-disable-next-line no-nested-ternary
+                        index === 0
+                          ? '0 0 4px 0'
+                          : index === gym.defenders.length - 1
+                          ? '4px 0 0 0'
+                          : '4px 0',
+                    }}
+                  >
+                    <Grid
+                      item
+                      xs={3}
+                      style={{
+                        paddingRight: 4,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      <img
+                        src={Icons.getPokemon(
+                          defender.pokemon_id,
+                          defender.form,
+                          undefined,
+                          defender.gender,
+                          defender.costume,
+                          defender.is_shiny,
+                        )}
+                        alt={defender.pokemon_id}
+                        style={{
+                          maxHeight: 45,
+                          maxWidth: 45,
+                        }}
+                      />
+                    </Grid>
+                    <Grid item container xs={9} spacing={0}>
+                      <Grid
+                        item
+                        xs={4}
+                        style={{
+                          textAlign: 'left',
+                          height: '0.75rem',
+                          lineHeight: '0.75rem',
+                        }}
+                      >
+                        <Typography variant="caption">Deployed</Typography>
+                      </Grid>
+                      <Grid
+                        item
+                        xs={8}
+                        style={{
+                          textAlign: 'right',
+                          height: '0.75rem',
+                          lineHeight: '0.75rem',
+                        }}
+                      >
+                        <Typography
+                          variant="caption"
+                          style={{ fontSize: '0.65rem' }}
+                        >
+                          {Utility.shortDayCheck(ts, defender.deployed)}
+                        </Typography>
+                      </Grid>
+                      <Grid
+                        item
+                        xs={4}
+                        style={{
+                          textAlign: 'left',
+                          height: '0.75rem',
+                          lineHeight: '0.75rem',
+                        }}
+                      >
+                        <Typography variant="caption">Trainer</Typography>
+                      </Grid>
+                      <Grid
+                        item
+                        xs={8}
+                        style={{
+                          textAlign: 'right',
+                          height: '0.75rem',
+                          lineHeight: '0.75rem',
+                        }}
+                      >
+                        <Typography
+                          variant="caption"
+                          style={{ fontSize: '0.65rem' }}
+                        >
+                          {defender.trainer}
+                        </Typography>
+                      </Grid>
+                      <Grid
+                        item
+                        xs={4}
+                        style={{
+                          textAlign: 'left',
+                          height: '0.75rem',
+                          lineHeight: '0.75rem',
+                        }}
+                      >
+                        <Typography variant="caption">CP</Typography>
+                      </Grid>
+                      <Grid
+                        item
+                        xs={8}
+                        style={{
+                          textAlign: 'right',
+                          height: '0.75rem',
+                          lineHeight: '0.75rem',
+                        }}
+                      >
+                        <Typography
+                          variant="caption"
+                          style={{ fontSize: '0.65rem' }}
+                        >
+                          {defender.current_cp} / {defender.total_cp}
+                        </Typography>
+                      </Grid>
+                      <Grid
+                        item
+                        xs={4}
+                        style={{
+                          textAlign: 'left',
+                          height: '0.75rem',
+                          lineHeight: '0.75rem',
+                        }}
+                      >
+                        <Typography variant="caption">IV</Typography>
+                      </Grid>
+                      <Grid
+                        item
+                        xs={8}
+                        style={{
+                          textAlign: 'right',
+                          height: '0.75rem',
+                          lineHeight: '0.75rem',
+                        }}
+                      >
+                        <Typography
+                          variant="caption"
+                          style={{ fontSize: '0.65rem' }}
+                        >
+                          {Math.round(defender.iv)}%
+                        </Typography>
+                      </Grid>
+                    </Grid>
+                  </Grid>
+                ))}
+              </Grid>
+            </Collapse>
+          )}
       </Grid>
     </ErrorBoundary>
   )
@@ -146,7 +314,10 @@ const MenuActions = ({ gym, perms, hasRaid, t, badge, setBadge }) => {
   const [anchorEl, setAnchorEl] = useState(false)
   const [badgeMenu, setBadgeMenu] = useState(false)
 
-  const addWebhook = useWebhook({ category: 'quickGym', selectedWebhook })
+  const addWebhook = useWebhook({
+    category: 'quickGym',
+    selectedWebhook,
+  })
   const {
     id,
     team_id,
@@ -224,11 +395,19 @@ const MenuActions = ({ gym, perms, hasRaid, t, badge, setBadge }) => {
     }
   }
 
-  const options = [{ name: 'hide', action: handleHide }]
+  const options = [
+    {
+      name: 'hide',
+      action: handleHide,
+    },
+  ]
 
   if (perms.gyms) {
     if (updated > gymValidDataLimit) {
-      options.push({ name: 'exclude_team', action: excludeTeam })
+      options.push({
+        name: 'exclude_team',
+        action: excludeTeam,
+      })
     }
     if (perms.gymBadges && filters.gyms?.gymBadges) {
       options.push({
@@ -239,8 +418,14 @@ const MenuActions = ({ gym, perms, hasRaid, t, badge, setBadge }) => {
   }
   if (perms.raids && hasRaid) {
     options.push(
-      { name: 'exclude_raid', action: excludeBoss },
-      { name: 'timer', action: handleTimer },
+      {
+        name: 'exclude_raid',
+        action: excludeBoss,
+      },
+      {
+        name: 'timer',
+        action: handleTimer,
+      },
     )
   }
   perms.webhooks.forEach((hook) => {
@@ -583,7 +768,7 @@ const GymFooter = ({ gym, popups, setPopups, hasRaid, perms, Icons }) => {
   return (
     <>
       {hasRaid && perms.raids && perms.gyms && (
-        <Grid item xs={4}>
+        <Grid item xs={3}>
           <IconButton
             className={classes.expand}
             onClick={() => handleExpandClick('raids')}
@@ -598,7 +783,7 @@ const GymFooter = ({ gym, popups, setPopups, hasRaid, perms, Icons }) => {
           </IconButton>
         </Grid>
       )}
-      <Grid item xs={4} style={{ textAlign: 'center' }}>
+      <Grid item xs={3} style={{ textAlign: 'center' }}>
         <IconButton
           href={url.replace('{x}', lat).replace('{y}', lon)}
           target="_blank"
@@ -608,13 +793,29 @@ const GymFooter = ({ gym, popups, setPopups, hasRaid, perms, Icons }) => {
         </IconButton>
       </Grid>
       {perms.gyms && (
-        <Grid item xs={4}>
+        <Grid item xs={3}>
           <IconButton
             className={popups.extras ? classes.expandOpen : classes.expand}
             onClick={() => handleExpandClick('extras')}
             aria-expanded={popups.extras}
           >
             <ExpandMore style={{ color: 'white' }} />
+          </IconButton>
+        </Grid>
+      )}
+      {perms.gyms && Array.isArray(gym.defenders) && gym.defenders.length > 0 && (
+        <Grid item xs={3}>
+          <IconButton
+            className={popups.defenders ? classes.expandOpen : classes.expand}
+            onClick={() => handleExpandClick('defenders')}
+            aria-expanded={popups.defenders}
+          >
+            <img
+              src={Icons.getMisc('gyms')}
+              alt="gyms"
+              height={20}
+              width="auto"
+            />
           </IconButton>
         </Grid>
       )}
